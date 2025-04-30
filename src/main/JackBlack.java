@@ -51,6 +51,8 @@ public class JackBlack {
 	
 	public JackBlack() {
 		
+		String filepath = "music.wav";
+		LoopMusic(filepath);
 		startGame(); 
 		
 		frame.setVisible(true);		
@@ -141,5 +143,24 @@ public class JackBlack {
 		System.out.println(deck);
 	}
 	
+	public static void LoopMusic(String location) {
+        try {
+            File musicPath = new File(location);
+
+            if (musicPath.exists()) {
+                AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioInput); 
+                clip.loop(Clip.LOOP_CONTINUOUSLY); 
+                clip.start(); 
+            } else {
+                System.out.println("Can't find file: " + location);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error playing music: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }
 
