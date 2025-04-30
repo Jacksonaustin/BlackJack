@@ -1,5 +1,7 @@
 package main;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.*; 
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,7 +11,6 @@ import java.io.File;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.swing.JOptionPane;
 
 
 public class JackBlack {
@@ -40,6 +41,30 @@ public class JackBlack {
 			try {
 			Image hiddenCardImg = new ImageIcon(getClass().getResource("/cards/BACK.png")).getImage();
 			g.drawImage(hiddenCardImg, 20, 20 , cardWidth, cardHeight, null);
+
+			
+			// dealer hand drawning
+			for(int i =0; i < dealerHand.size(); i ++) {
+				Card card = dealerHand.get(i);
+				Image cardImg =  new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+				g.drawImage(cardImg, cardWidth + 25 + (cardWidth + 5)*i, 20, cardWidth, cardHeight, null);
+			}
+			g.drawImage(hiddenCardImg, 20, 20 , cardWidth, cardHeight, null);
+			
+			// player hand drawning
+			
+			for(int i = 0; i < playerHand.size(); i ++) {
+				Card card = playerHand.get(i);
+				Image cardImg = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+				g.drawImage(cardImg, 20 + (cardWidth + 5)*i, 320, cardWidth, cardHeight, null);
+
+			}
+
+			
+			
+			
+			
+			
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
@@ -69,6 +94,26 @@ public class JackBlack {
 		buttonPanel.add(hitButton);
 		buttonPanel.add(stayButton);
 		frame.add(buttonPanel, BorderLayout.SOUTH);
+		
+		hitButton.addActionListener(new ActionListener(){
+
+			public void actionPerformed(ActionEvent arg0) {
+				Card card = deck.remove(deck.size()-1);
+				playerSum += card.getValue();
+				playerAceCount += card.isAce()? 1 : 0;
+				playerHand.add(card);
+				
+				if(reducePlayerAce()>21) {
+					hitButton.setEnabled(false);
+				}
+				gamePanel.repaint();
+			}
+
+
+			
+		});
+		
+		gamePanel.repaint();
 	}
 	
 	public void startGame() {
@@ -162,5 +207,23 @@ public class JackBlack {
             e.printStackTrace();
         }
     }
+	
+	public int reducePlayerAce() {
+		
+		while(playerSum > 21 && playerAceCount > 0) {
+			playerSum -= 10;
+			playerAceCount -=1; 
+		}
+
+		return playerSum;
+	}
+	
+	public int reduceDealerAce() {
+		while(dealerSum > 21 && dealerAceCount > 0) {
+			dealerSum -= 10;
+			dealerAceCount -= 1;
+		}
+		return dealerSum;
+	}
 }
 
