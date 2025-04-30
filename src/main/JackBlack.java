@@ -6,11 +6,18 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import java.io.File;
+
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.SourceDataLine;
 
 
 public class JackBlack {
@@ -35,6 +42,7 @@ public class JackBlack {
 	
 	private Image backGround; 
 	boolean gameOver = false;
+	static boolean music = true;
 	
 	
 	JFrame frame = new JFrame("UAFS UNDERGROUND CASINO");
@@ -93,7 +101,12 @@ public class JackBlack {
 				if(playerSum > 21) {
 					message = "You Lose!";
 					gameOver = true;
-				} else if (dealerSum > 21) {
+				} else if(playerSum == 21 &&playerAceCount ==1){
+					message = "BlackJack!!";
+					gameOver = true;
+					
+				}
+				else if (dealerSum > 21) {
 					message = "You Win!";
 					gameOver = true;
 
@@ -136,13 +149,14 @@ public class JackBlack {
 	JButton hitButton = new JButton("Hit");
 	JButton stayButton = new JButton("Stay");
 	JButton againButton = new JButton("Again");
+	JButton mute = new JButton("Mute");
 	
 	public JackBlack() {
 		
 		String filepath = "src/main/music.wav";
 		backGround = new ImageIcon(getClass().getResource("casino.jpg")).getImage();
-
 		LoopMusic(filepath);
+
 		startGame(); 
 		
 		frame.setVisible(true);		
@@ -159,9 +173,28 @@ public class JackBlack {
 		buttonPanel.add(hitButton);
 		buttonPanel.add(stayButton);
 		buttonPanel.add(againButton);
+		buttonPanel.add(mute);
 		againButton.setVisible(false);
+		mute.setVisible(false);
 		
 		frame.add(buttonPanel, BorderLayout.SOUTH);
+		
+		
+		mute.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+				if(music) {
+					music = false;
+				}
+				else {
+					music = true;
+				}
+				
+			}
+			
+		});
 		
 		hitButton.addActionListener(new ActionListener(){
 
@@ -260,6 +293,7 @@ public class JackBlack {
 		
 	}
 	
+	
 	public int getAcePlayerSum() {
 	    int sum = playerSum;
 	    int aces = playerAceCount;
@@ -302,15 +336,24 @@ public class JackBlack {
 	}
 	
 	public static void LoopMusic(String location) {
+
         try {
             File musicPath = new File(location);
 
             if (musicPath.exists()) {
+            	
                 AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
                 Clip clip = AudioSystem.getClip();
-                clip.open(audioInput); 
-                clip.loop(Clip.LOOP_CONTINUOUSLY); 
-                clip.start(); 
+                if(music) {
+                    clip.open(audioInput); 
+                	clip.start();
+                }
+                else {
+                	clip.stop();
+                	clip.flush();
+                }
+                
+            
             } else {
                 System.out.println("Can't find file: " + location);
             }
