@@ -21,6 +21,7 @@ public class JackBlack {
 	ArrayList<Card> dealerHand;
 	int dealerSum;
 	int dealerAceCount;
+	int dealerHiddenSum;
 	
 	ArrayList<Card> playerHand;
 	int playerSum;
@@ -32,6 +33,10 @@ public class JackBlack {
 	int cardWidth = 110;
 	int cardHeight = 154;
 	
+	private Image backGround; 
+	boolean gameOver = false;
+	
+	
 	JFrame frame = new JFrame("UAFS UNDERGROUND CASINO");
 	JPanel gamePanel = new JPanel() {
 		@Override
@@ -39,9 +44,16 @@ public class JackBlack {
 			super.paintComponent(g);
 			
 			try {
+			if(backGround !=null) {
+				
+	            g.drawImage(backGround, 0, 0, getWidth(), getHeight(), null);
+
+				
+			}
 			Image hiddenCardImg = new ImageIcon(getClass().getResource("/cards/BACK.png")).getImage();
 			if(!stayButton.isEnabled()) {
 				hiddenCardImg = new ImageIcon(getClass().getResource(hiddenCard.getImagePath())).getImage();
+				
 			}
 			g.drawImage(hiddenCardImg, 20, 20 , cardWidth, cardHeight, null);
 
@@ -50,7 +62,10 @@ public class JackBlack {
 			for(int i =0; i < dealerHand.size(); i ++) {
 				Card card = dealerHand.get(i);
 				Image cardImg =  new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+				
 				g.drawImage(cardImg, cardWidth + 25 + (cardWidth + 5)*i, 20, cardWidth, cardHeight, null);
+				
+				
 			}
 			g.drawImage(hiddenCardImg, 20, 20 , cardWidth, cardHeight, null);
 			
@@ -60,6 +75,10 @@ public class JackBlack {
 				Card card = playerHand.get(i);
 				Image cardImg = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
 				g.drawImage(cardImg, 20 + (cardWidth + 5)*i, 320, cardWidth, cardHeight, null);
+				
+				g.setFont(new Font("Arial", Font.PLAIN, 30));
+				g.setColor(Color.white);
+				g.drawString(playerSum+"", 290, 525);
 
 			}
 
@@ -73,19 +92,35 @@ public class JackBlack {
 				String message = "";
 				if(playerSum > 21) {
 					message = "You Lose!";
+					gameOver = true;
 				} else if (dealerSum > 21) {
 					message = "You Win!";
+					gameOver = true;
+
 				} else if (playerSum == dealerSum) {
 					message = "Tie";
+					gameOver = true;
+
 				} else if (playerSum > dealerSum) {
 					message = "You Win!";
+					gameOver = true;
+
 				} else if (playerSum < dealerSum) {
 					message = "You Lose!";
+					gameOver = true;
+
 				}
+				
+				
+				
+				
 				
 				g.setFont(new Font("Arial", Font.PLAIN, 30));
 				g.setColor(Color.white);
-				g.drawString(message, 220, 250);
+				g.drawString(dealerSum+"", 290, 240);
+
+				g.drawString(message, 245, 300);
+				againButton.setVisible(true); 
 				
 			}
 			
@@ -100,10 +135,13 @@ public class JackBlack {
 	JPanel buttonPanel = new JPanel();
 	JButton hitButton = new JButton("Hit");
 	JButton stayButton = new JButton("Stay");
+	JButton againButton = new JButton("Again");
 	
 	public JackBlack() {
 		
 		String filepath = "src/main/music.wav";
+		backGround = new ImageIcon(getClass().getResource("casino.jpg")).getImage();
+
 		LoopMusic(filepath);
 		startGame(); 
 		
@@ -120,6 +158,9 @@ public class JackBlack {
 		hitButton.setFocusable(false);
 		buttonPanel.add(hitButton);
 		buttonPanel.add(stayButton);
+		buttonPanel.add(againButton);
+		againButton.setVisible(false);
+		
 		frame.add(buttonPanel, BorderLayout.SOUTH);
 		
 		hitButton.addActionListener(new ActionListener(){
@@ -133,6 +174,7 @@ public class JackBlack {
 				if(reducePlayerAce()>21) {
 					hitButton.setEnabled(false);
 				}
+				
 				gamePanel.repaint();
 			}
 
@@ -155,7 +197,18 @@ public class JackBlack {
 			}
 		});
 		
-		gamePanel.repaint();
+		
+		againButton.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				hitButton.setEnabled(true);
+				stayButton.setEnabled(true);
+				gameOver = false;
+				startGame();
+				againButton.setVisible(false);
+				gamePanel.repaint();
+			}
+		});
 	}
 	
 	public void startGame() {
@@ -190,6 +243,11 @@ public class JackBlack {
 			 card = deck.remove(deck.size()-1);
 			 playerSum += card.getValue();
 			 playerAceCount += card.isAce() ? 1: 0;
+			 
+			 if(card.isAce()) {
+				playerSum = getAcePlayerSum();
+			 }
+			 
 			 playerHand.add(card);
 		}
 		
@@ -201,6 +259,19 @@ public class JackBlack {
 		
 		
 	}
+	
+	public int getAcePlayerSum() {
+	    int sum = playerSum;
+	    int aces = playerAceCount;
+
+	    while (sum > 21 && aces > 0) {
+	        sum -= 10;
+	        aces--;
+	    }
+
+	    return sum;
+	}
+	
 	
 	public void buildDeck() {
 		
