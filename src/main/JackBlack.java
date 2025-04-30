@@ -51,7 +51,7 @@ public class JackBlack {
 	
 	public JackBlack() {
 		
-		String filepath = "music.wav";
+		String filepath = "src/main/music.wav";
 		LoopMusic(filepath);
 		startGame(); 
 		
