@@ -31,4 +31,8 @@ public class Card {
 	public boolean isAce() {
 		return value == "A";
 	}
+	
+	public String getImagePath() {
+		return "/cards/" + toString() + ".png";
+	}
 }
